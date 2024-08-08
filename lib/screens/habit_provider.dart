@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -14,23 +14,24 @@ class HabitProvider with ChangeNotifier {
 
   Future<void> _initializeNotifications() async {
     tz.initializeTimeZones();
-    const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
     );
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> addHabit(String name, String description) async {
+  Future<void> addHabit(String name, String description, DateTime scheduledDateTime, String? ringtonePath) async {
     DocumentReference habitRef = await _habitsCollection.add({
       'name': name,
       'description': description,
       'createdAt': DateTime.now(),
-      'completedDates': []
+      'completedDates': [],
+      'scheduledDateTime': scheduledDateTime,
+      'ringtonePath': ringtonePath,
     });
     notifyListeners();
-    scheduleNotification(habitRef.id, name, tz.TZDateTime.now(tz.local).add(const Duration(days: 1)));
+    scheduleNotification(habitRef.id, name, scheduledDateTime, ringtonePath);
   }
 
   Future<void> updateHabit(String id, String name, String description) async {
@@ -60,24 +61,24 @@ class HabitProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> scheduleNotification(String id, String habitName, tz.TZDateTime scheduledTime) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
+  Future<void> scheduleNotification(String id, String habitName, DateTime scheduledTime, String? ringtonePath) async {
+    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'habit_tracker_channel',
       'Habit Tracker',
       channelDescription: 'Channel for habit tracker notifications',
       importance: Importance.max,
       priority: Priority.high,
+      sound: ringtonePath != null ? RawResourceAndroidNotificationSound(ringtonePath) : null,
+      playSound: ringtonePath != null,
       showWhen: false,
     );
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id.hashCode,
       'Habit Reminder',
       'Don\'t forget to complete your habit: $habitName',
-      scheduledTime,
+      tz.TZDateTime.from(scheduledTime, tz.local),
       platformChannelSpecifics,
-
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );

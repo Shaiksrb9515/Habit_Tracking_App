@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'habit_provider.dart';
 import 'package:provider/provider.dart';
+import 'habit_provider.dart';
 
 class HabitList extends StatelessWidget {
   const HabitList({super.key});
@@ -25,7 +25,8 @@ class HabitList extends StatelessWidget {
               trailing: IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () {
-                  Provider.of<HabitProvider>(context, listen: false).deleteHabit(habit.id);
+                  Provider.of<HabitProvider>(context, listen: false)
+                      .deleteHabit(habit.id);
                 },
               ),
             );

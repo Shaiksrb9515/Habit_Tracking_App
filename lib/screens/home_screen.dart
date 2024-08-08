@@ -22,7 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const AddHabitScreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddHabitScreen()),
+              );
             },
           ),
         ],

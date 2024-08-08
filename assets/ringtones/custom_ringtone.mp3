@@ -1,0 +1,7 @@
+import 'package:audioplayers/audioplayers.dart';
+
+// Initialize AudioPlayer
+AudioPlayer audioPlayer = AudioPlayer();
+
+// Play the custom ringtone
+audioPlayer.play('assets/ringtones/custom_ringtone.mp3');
